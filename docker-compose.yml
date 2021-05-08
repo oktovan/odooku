@@ -1,0 +1,36 @@
+version: '2'
+services:
+  db:
+    image: postgres:10.0
+    networks:
+      - odooku_net
+    environment:
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+      - POSTGRES_DB=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    restart: unless-stopped             # run as a service
+    volumes:
+      - odooku_db:/var/lib/postgresql/data/pgdata
+  odoo:
+    image: odoo:14.0
+    networks:
+      - odooku_net
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+      - "8071:8071"  
+    tty: true
+    command: -- --dev=reload
+    volumes:
+      - ./etc:/etc/odoo
+      - odooku_odoo:/var/lib/odoo
+      - ./addons:/mnt/addons
+    restart: unless-stopped             # run as a service
+networks:
+    odooku_net: 
+        driver: bridge
+volumes:
+    odooku_db:
+    odooku_odoo:  
